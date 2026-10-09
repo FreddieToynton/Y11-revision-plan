@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCSE Revision Command Center</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight">GCSE Revision Command Center</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Core-Weighted Timetable Rota</p>
+                </div>
+            </div>
+
+            <!-- Header Controls: Week Toggle, Dark Mode -->
+            <div class="flex items-center space-x-3">
+                <button id="weekToggleBtn" onclick="toggleWeekRota()" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition shadow-sm hover:bg-emerald-200">
+                    Showing: <span id="currentWeekDisplay" class="underline font-bold">Week A</span>
+                </button>
+
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <i id="darkModeIcon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Summary Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Study Time</span>
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-sm"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-baseline space-x-2">
+                    <span id="totalHoursStat" class="text-2xl font-bold">0 hrs</span>
+                    <span class="text-xs text-slate-500">completed</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Overall Progress</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-chart-pie text-sm"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span id="overallPercentage" class="text-2xl font-bold">0%</span>
+                        <span id="completedCount" class="text-xs text-slate-500">0 of 0 sessions</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                        <div id="overallProgressBar" class="bg-emerald-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Timer Focus</span>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                        <i class="fa-solid fa-stopwatch text-sm"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                    <div>
+                        <div id="timerDisplay" class="text-2xl font-bold font-mono">45:00</div>
+                        <div id="timerSessionName" class="text-xs text-slate-500">Select session below</div>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="startTimer()" class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition shadow-sm"><i class="fa-solid fa-play text-xs"></i></button>
+                        <button onclick="pauseTimer()" class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition"><i class="fa-solid fa-pause text-xs"></i></button>
+                        <button onclick="resetTimer()" class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Quick Actions</span>
+                </div>
+                <div class="mt-3 flex space-x-2">
+                    <button onclick="openSubjectModal('Maths')" class="flex-1 py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl transition text-center">
+                        <i class="fa-solid fa-book-open mr-1.5"></i> Core Guides
+                    </button>
+                    <button onclick="resetAllProgress()" class="py-2 px-3 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-semibold rounded-xl transition text-center" title="Reset Progress">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable Section -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h2 class="text-xl font-bold tracking-tight">Weekly Timetable Rota</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Core Weighted</span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Weekdays: 1h30m (Two 45m blocks). Weekends: 2h (Two 60m blocks). Maths, English & Sciences prioritized.</p>
+                </div>
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <button id="tabWeekA" onclick="switchTab('A')" class="px-4 py-1.5 text-xs font-bold rounded-lg transition bg-white dark:bg-slate-700 shadow-sm">Week A Rota</button>
+                    <button id="tabWeekB" onclick="switchTab('B')" class="px-4 py-1.5 text-xs font-bold rounded-lg transition text-slate-600 dark:text-slate-400">Week B Rota</button>
+                </div>
+            </div>
+
+            <!-- Timetable Grid Container -->
+            <div id="timetableContainer" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <div id="notesModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="modalSubjectIcon" class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-atom"></i>
+                    </div>
+                    <div>
+                        <h3 id="modalSubjectTitle" class="text-lg font-bold">Revision Guide</h3>
+                        <p class="text-xs text-slate-500">Key formulae, core practicals, and top exam tips</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modalSubjectBody" class="p-6 overflow-y-auto space-y-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                <!-- Content injected dynamically -->
+            </div>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                <button onclick="loadIntoTimerFromModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition shadow-sm">
+                    <i class="fa-solid fa-play mr-1.5"></i> Load into Timer
+                </button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 font-semibold text-xs rounded-xl transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Subject Database with Revision Tips and Weighting Flags
+        const subjectsData = {
+            "Maths": {
+                icon: "fa-calculator",
+                isCore: true,
+                color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900",
+                tips: [
+                    "Focus heavily on high-yield topics: Quadratic equations, trigonometry (Sine/Cosine rule), circle theorems.",
+                    "Always show clear working out steps to secure method marks even if final arithmetic is incorrect.",
+                    "Practise past papers under timed exam conditions without formula sheets."
+                ]
+            },
+            "English Lang": {
+                icon: "fa-pen-nib",
+                isCore: true,
+                color: "text-purple-500 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900",
+                tips: [
+                    "Master paper structure: Question 2 (language analysis), Question 3 (structural shift), Question 4 (evaluation statement).",
+                    "Build a diverse vocabulary bank for descriptive and narrative creative writing (Paper 1 Question 5).",
+                    "Practise transactional writing formats: articles, letters, speeches, and reviews."
+                ]
+            },
+            "English Lit": {
+                icon: "fa-book-open-reader",
+                isCore: true,
+                color: "text-amber-500 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900",
+                tips: [
+                    "Learn 5-7 versatile quotations for every key character and theme in your texts (e.g. Macbeth, An Inspector Calls, Jekyll & Hyde).",
+                    "Embed quotes naturally into analytical paragraphs using zoom-ins on specific single-word terminology.",
+                    "Understand the historical, social, and political context of the writer's era."
+                ]
+            },
+            "Physics": {
+                icon: "fa-atom",
+                isCore: true,
+                color: "text-blue-500 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-900",
+                tips: [
+                    "Memorise fundamental equations: $v = u + at$, $F = ma$, $E_k = \\frac{1}{2}mv^2$, $P = IV$.",
+                    "Practise rearranging formulae before substituting values in calculations.",
+                    "Understand required practicals: Specific heat capacity, resistance of a wire, and ripple tank waves."
+                ]
+            },
+            "Chemistry": {
+                icon: "fa-flask",
+                isCore: true,
+                color: "text-cyan-500 bg-cyan-50 dark:bg-cyan-950/50 border-cyan-200 dark:border-cyan-900",
+                tips: [
+                    "Learn how to balance chemical equations and calculate moles ($moles = mass \\div Mr$).",
+                    "Understand ionic, covalent, and metallic bonding structures with properties.",
+                    "Practise titration calculations and rates of reaction graphs step-by-step."
+                ]
+            },
+            "Biology": {
+                icon: "fa-dna",
+                isCore: true,
+                color: "text-rose-500 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900",
+                tips: [
+                    "Master cell biology diagrams (plant/animal cells, mitosis cycle, osmosis experiments).",
+                    "Memorise key definitions: active transport, enzymes, homeostasis, monoclonal antibodies.",
+                    "Practise interpreting complex graphs and data tables from ecology and respiration experiments."
+                ]
+            },
+            "Geography": {
+                icon: "fa-earth-americas",
+                isCore: false,
+                color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900",
+                tips: [
+                    "Memorise specific case study facts, figures, and named locations (e.g., Lagos urban regeneration, Nepal earthquake).",
+                    "Structure 9-mark questions with balanced evaluation and a well-reasoned conclusion.",
+                    "Practise OS map skills, grid references, and contour lines."
+                ]
+            },
+            "Computer Science": {
+                icon: "fa-code",
+                isCore: false,
+                color: "text-teal-500 bg-teal-50 dark:bg-teal-950/50 border-teal-200 dark:border-teal-900",
+                tips: [
+                    "Revise logic gates, truth tables, boolean algebra laws, and CPU architecture (Von Neumann).",
+                    "Practise Python programming constructs: iteration, selection, arrays, file handling, and subroutines.",
+                    "Understand cyber security threats, networking protocols (TCP/IP, HTTP/HTTPS), and data encryption."
+                ]
+            },
+            "French": {
+                icon: "fa-language",
+                isCore: false,
+                color: "text-pink-500 bg-pink-50 dark:bg-pink-950/50 border-pink-200 dark:border-pink-900",
+                tips: [
+                    "Learn high-frequency opinion phrases and complex tense structures (passé composé, imparfait, futur simple, conditionnel).",
+                    "Practise translation sentences both ways (English to French and French to English).",
+                    "Prepare structured bullet points for speaking roleplay, photo cards, and general conversation themes."
+                ]
+            },
+            "Music": {
+                icon: "fa-music",
+                isCore: false,
+                color: "text-orange-500 bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-900",
+                tips: [
+                    "Revise set works musical features: instrumentation, texture, tonality, structure, and dynamics.",
+                    "Practise music theory fundamentals: chord progressions, cadence types, and identifying musical eras.",
+                    "Listen to set pieces actively while following score annotations."
+                ]
+            }
+        };
+
+        // Core-Weighted Timetable Rota structure for Week A and Week B
+        // Weekdays: 2 blocks of 45 mins (1h30m total). Weekends: 2 blocks of 60 mins (2h total).
+        // Core subjects (Maths, English Lang/Lit, Physics, Chemistry, Biology) appear more frequently.
+        const timetableData = {
+            "A": {
+                "Monday": [
+                    { block: 1, subject: "Maths", duration: 45, topic: "Algebra & Quadratics" },
+                    { block: 2, subject: "Physics", duration: 45, topic: "Forces & Newton's Laws" }
+                ],
+                "Tuesday": [
+                    { block: 1, subject: "English Lang", duration: 45, topic: "Paper 1 Reading Skills" },
+                    { block: 2, subject: "Chemistry", duration: 45, topic: "Atomic Structure & Bonding" }
+                ],
+                "Wednesday": [
+                    { block: 1, subject: "Biology", duration: 45, topic: "Cell Biology & Microscopy" },
+                    { block: 2, subject: "Maths", duration: 45, topic: "Trigonometry & Graphs" }
+                ],
+                "Thursday": [
+                    { block: 1, subject: "English Lit", duration: 45, topic: "Macbeth Key Quotations" },
+                    { block: 2, subject: "Geography", duration: 45, topic: "Tectonic Hazards" }
+                ],
+                "Friday": [
+                    { block: 1, subject: "Physics", duration: 45, topic: "Energy Stores & Transfers" },
+                    { block: 2, subject: "Computer Science", duration: 45, topic: "CPU Architecture & Memory" }
+                ],
+                "Saturday": [
+                    { block: 1, subject: "Maths", duration: 60, topic: "Simultaneous Equations & Vectors" },
+                    { block: 2, subject: "Chemistry", duration: 60, topic: "Quantitative Chemistry & Moles" }
+                ],
+                "Sunday": [
+                    { block: 1, subject: "English Lit", duration: 60, topic: "Poetry Comparison & Context" },
+                    { block: 2, subject: "French", duration: 60, topic: "Grammar Tenses & Writing" }
+                ]
+            },
+            "B": {
+                "Monday": [
+                    { block: 1, subject: "Biology", duration: 45, topic: "Bioenergetics & Respiration" },
+                    { block: 2, subject: "English Lang", duration: 45, topic: "Creative Writing (Paper 1 Q5)" }
+                ],
+                "Tuesday": [
+                    { block: 1, subject: "Maths", duration: 45, topic: "Statistics & Probability" },
+                    { block: 2, subject: "Physics", duration: 45, topic: "Electricity & Circuits" }
+                ],
+                "Wednesday": [
+                    { block: 1, subject: "Chemistry", duration: 45, topic: "Chemical Changes & Acids" },
+                    { block: 2, subject: "English Lit", duration: 45, topic: "Inspector Calls Characters" }
+                ],
+                "Thursday": [
+                    { block: 1, subject: "Biology", duration: 45, topic: "Infection & Response" },
+                    { block: 2, subject: "Music", duration: 45, topic: "Set Work Score Analysis" }
+                ],
+                "Friday": [
+                    { block: 1, subject: "Maths", duration: 45, topic: "Ratio, Proportion & Rates" },
+                    { block: 2, subject: "French", duration: 45, topic: "Vocabulary & Reading" }
+                ],
+                "Saturday": [
+                    { block: 1, subject: "Physics", duration: 60, topic: "Waves & Electromagnetic Spectrum" },
+                    { block: 2, subject: "Computer Science", duration: 60, topic: "Python Programming Practise" }
+                ],
+                "Sunday": [
+                    { block: 1, subject: "English Lang", duration: 60, topic: "Transactional Writing & Speeches" },
+                    { block: 2, subject: "Geography", duration: 60, topic: "Urban Issues & Sustainability" }
+                ]
+            }
+        };
+
+        // Application State
+        let currentWeek = localStorage.getItem('gcse_current_week') || 'A';
+        let completedSessions = JSON.parse(localStorage.getItem('gcse_completed_sessions')) || {};
+        
+        // Timer State
+        let timerDuration = 45 * 60;
+        let timerTimeLeft = 45 * 60;
+        let timerInterval = null;
+        let timerRunning = false;
+        let activeTimerSubject = 'No session selected';
+
+        // Initialize App on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initDarkMode();
+            renderTimetable();
+            updateStats();
+            initTimerDisplay();
+        });
+
+        // Dark Mode functions
+        function initDarkMode() {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeIcon').className = 'fa-solid fa-sun text-sm';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('darkModeIcon').className = 'fa-solid fa-moon text-sm';
+            }
+        }
+
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('darkModeIcon').className = 'fa-solid fa-moon text-sm';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('darkModeIcon').className = 'fa-solid fa-sun text-sm';
+            }
+        }
+
+        // Toggle Week Rota
+        function toggleWeekRota() {
+            currentWeek = currentWeek === 'A' ? 'B' : 'A';
+            localStorage.setItem('gcse_current_week', currentWeek);
+            document.getElementById('currentWeekDisplay').innerText = `Week ${currentWeek}`;
+            switchTab(currentWeek);
+        }
+
+        function switchTab(week) {
+            currentWeek = week;
+            document.getElementById('currentWeekDisplay').innerText = `Week ${week}`;
+            
+            const btnA = document.getElementById('tabWeekA');
+            const btnB = document.getElementById('tabWeekB');
+            
+            if (week === 'A') {
+                btnA.className = "px-4 py-1.5 text-xs font-bold rounded-lg transition bg-white dark:bg-slate-700 shadow-sm";
+                btnB.className = "px-4 py-1.5 text-xs font-bold rounded-lg transition text-slate-600 dark:text-slate-400";
+            } else {
+                btnB.className = "px-4 py-1.5 text-xs font-bold rounded-lg transition bg-white dark:bg-slate-700 shadow-sm";
+                btnA.className = "px-4 py-1.5 text-xs font-bold rounded-lg transition text-slate-600 dark:text-slate-400";
+            }
+            renderTimetable();
+        }
+
+        // Render Timetable Grid
+        function renderTimetable() {
+            const container = document.getElementById('timetableContainer');
+            container.innerHTML = '';
+            
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const rota = timetableData[currentWeek];
+
+            days.forEach(day => {
+                const sessions = rota[day];
+                const dayColumn = document.createElement('div');
+                dayColumn.className = "flex flex-col space-y-3 bg-slate-50 dark:bg-slate-950/40 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80";
+                
+                let dayHeaderHtml = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <span class="font-bold text-sm tracking-tight">${day}</span>
+                        <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${day === 'Saturday' || day === 'Sunday' ? '2h total' : '1h30m'}</span>
+                    </div>
+                    <div class="space-y-2.5">
+                `;
+
+                sessions.forEach((session) => {
+                    const key = `${currentWeek}-${day}-${session.block}`;
+                    const isCompleted = completedSessions[key] || false;
+                    const subInfo = subjectsData[session.subject] || { icon: 'fa-book', color: 'text-slate-500 bg-slate-100', isCore: false };
+
+                    dayHeaderHtml += `
+                        <div class="group relative bg-white dark:bg-slate-900 border ${isCompleted ? 'border-emerald-500/50 bg-emerald-50/20 dark:bg-emerald-950/10' : 'border-slate-200 dark:border-slate-800'} rounded-xl p-3 shadow-xs hover:border-emerald-500 transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-2 cursor-pointer" onclick="openSubjectModal('${session.subject}')">
+                                    <div class="w-7 h-7 rounded-lg ${subInfo.color.split(' ')[1]} ${subInfo.color.split(' ')[0]} flex items-center justify-center text-xs shrink-0">
+                                        <i class="fa-solid ${subInfo.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center space-x-1.5">
+                                            <h4 class="text-xs font-bold leading-tight group-hover:text-emerald-600 transition">${session.subject}</h4>
+                                            ${subInfo.isCore ? '<span class="text-[9px] font-semibold px-1 py-0.2 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">Core</span>' : ''}
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">${session.topic}</p>
+                                    </div>
+                                </div>
+                                <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleSessionCompletion('${key}')" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer mt-0.5">
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+                                <span class="font-medium">${session.duration} mins</span>
+                                <div class="flex space-x-1.5">
+                                    <button onclick="setTimerForSession('${session.subject}', ${session.duration})" title="Start Timer" class="hover:text-emerald-600 transition"><i class="fa-solid fa-play"></i></button>
+                                    <button onclick="openSubjectModal('${session.subject}')" title="View Revision Tips" class="hover:text-emerald-600 transition"><i class="fa-solid fa-circle-info"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                dayHeaderHtml += `</div>`;
+                dayColumn.innerHTML = dayHeaderHtml;
+                container.appendChild(dayColumn);
+            });
+        }
+
+        // Toggle Session Completion
+        function toggleSessionCompletion(key) {
+            completedSessions[key] = !completedSessions[key];
+            localStorage.setItem('gcse_completed_sessions', JSON.stringify(completedSessions));
+            updateStats();
+            renderTimetable();
+        }
+
+        // Update Stats & Progress Bar
+        function updateStats() {
+            let totalSessionsCount = 0;
+            let completedCountVal = 0;
+            let totalMinutesStudied = 0;
+
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            
+            ['A', 'B'].forEach(w => {
+                days.forEach(d => {
+                    timetableData[w][d].forEach(s => {
+                        totalSessionsCount++;
+                        const k = `${w}-${d}-${s.block}`;
+                        if (completedSessions[k]) {
+                            completedCountVal++;
+                            totalMinutesStudied += s.duration;
+                        }
+                    });
+                });
+            });
+
+            const percent = totalSessionsCount > 0 ? Math.round((completedCountVal / totalSessionsCount) * 100) : 0;
+            
+            document.getElementById('overallPercentage').innerText = `${percent}%`;
+            document.getElementById('completedCount').innerText = `${completedCountVal} completed`;
+            document.getElementById('overallProgressBar').style.width = `${percent}%`;
+
+            const totalHours = (totalMinutesStudied / 60).toFixed(1);
+            document.getElementById('totalHoursStat').innerText = `${totalHours} hrs`;
+        }
+
+        function resetAllProgress() {
+            if (confirm("Are you sure you want to reset all your completed revision sessions?")) {
+                completedSessions = {};
+                localStorage.removeItem('gcse_completed_sessions');
+                updateStats();
+                renderTimetable();
+            }
+        }
+
+        // Timer Logic
+        function initTimerDisplay() {
+            document.getElementById('timerDisplay').innerText = formatTime(timerTimeLeft);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function setTimerForSession(subject, durationMins) {
+            pauseTimer();
+            activeTimerSubject = subject;
+            timerDuration = durationMins * 60;
+            timerTimeLeft = timerDuration;
+            document.getElementById('timerSessionName').innerText = subject;
+            document.getElementById('timerDisplay').innerText = formatTime(timerTimeLeft);
+            startTimer();
+        }
+
+        function startTimer() {
+            if (timerRunning) return;
+            if (activeTimerSubject === 'No session selected') {
+                activeTimerSubject = 'General Revision';
+                document.getElementById('timerSessionName').innerText = activeTimerSubject;
+            }
+            timerRunning = true;
+            timerInterval = setInterval(() => {
+                if (timerTimeLeft > 0) {
+                    timerTimeLeft--;
+                    document.getElementById('timerDisplay').innerText = formatTime(timerTimeLeft);
+                } else {
+                    pauseTimer();
+                    playAlertSound();
+                    alert(`⏱️ Great job! Your study session for ${activeTimerSubject} is complete.`);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerTimeLeft = timerDuration;
+            document.getElementById('timerDisplay').innerText = formatTime(timerTimeLeft);
+        }
+
+        function playAlertSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.8);
+            } catch (e) {
+                console.log('Audio context not supported');
+            }
+        }
+
+        // Subject Notes Modal
+        function openSubjectModal(subjectName) {
+            const sub = subjectsData[subjectName];
+            if (!sub) return;
+
+            document.getElementById('modalSubjectTitle').innerText = `${subjectName} Master Guide`;
+            document.getElementById('modalSubjectIcon').className = `w-10 h-10 rounded-xl ${sub.color.split(' ')[1]} ${sub.color.split(' ')[0]} flex items-center justify-center text-lg`;
+            document.getElementById('modalSubjectIcon').innerHTML = `<i class="fa-solid ${sub.icon}"></i>`;
+            
+            let htmlContent = `
+                <div class="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-2xl mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">High-Yield Exam Tips</h4>
+                        ${sub.isCore ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">Core Subject</span>' : '<span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Option Subject</span>'}
+                    </div>
+                    <ul class="space-y-2">
+            `;
+            
+            sub.tips.forEach(tip => {
+                htmlContent += `<li class="flex items-start space-x-2"><i class="fa-solid fa-circle-check text-emerald-600 mt-1 text-xs"></i><span>${tip}</span></li>`;
+            });
+
+            htmlContent += `
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Recommended Revision Method</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Use active recall, flashcards, and past paper questions immediately after reviewing core notes. Keep your phone in another room during your 45m or 60m block.
+                    </p>
+                </div>
+            `;
+
+            document.getElementById('modalSubjectBody').innerHTML = htmlContent;
+            document.getElementById('notesModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('notesModal').classList.add('hidden');
+        }
+
+        function loadIntoTimerFromModal() {
+            const title = document.getElementById('modalSubjectTitle').innerText.replace(' Master Guide', '');
+            closeModal();
+            setTimerForSession(title, 45);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
